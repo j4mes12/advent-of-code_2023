@@ -3,7 +3,7 @@ import re
 
 def part_one(filepath: str) -> int:
     sum_val = 0
-    record, matching_digits, matching_symbols = [], [], []
+    record, previous_digit_coords, previous_symbol_coords = [], [], []
 
     with open(filepath) as file:
         for line in file:
@@ -15,13 +15,13 @@ def part_one(filepath: str) -> int:
 
             matching_digits = [
                 coords
-                for coords in matching_digits + digits_coords
+                for coords in previous_digit_coords + digits_coords
                 if coords not in record
             ]
 
             matching_symbols = [
                 coords
-                for coords in matching_symbols + symbol_coords
+                for coords in previous_symbol_coords + symbol_coords
                 if coords not in record
             ]
 
@@ -36,8 +36,8 @@ def part_one(filepath: str) -> int:
                             break
 
             # Update previous coordinates of digits and symbols
-            matching_digits = digits_coords
-            matching_symbols = symbol_coords
+            previous_digit_coords = digits_coords
+            previous_symbol_coords = symbol_coords
 
     return sum_val
 
