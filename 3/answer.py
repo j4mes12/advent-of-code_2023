@@ -3,52 +3,45 @@ import re
 
 def part_one(filepath: str) -> int:
     sum_val = 0
-    record, prev_digit_coords, prev_symbol_coords = [], [], []
+    record, matching_digits, matching_symbols = [], [], []
 
     with open(filepath) as file:
-        for line_num, line in enumerate(file):
+        for line in file:
             digits_coords = [
                 (match.group(), match.start(), match.end())
                 for match in re.finditer(r"\d+", line)
             ]
             symbol_coords = [match.start() for match in re.finditer(r"[^\.\d\s]", line)]
 
-            if symbol_coords:
-                for sc in symbol_coords:
-                    if digits_coords:
-                        for num, start, end in digits_coords:
-                            if sc < start - 1:
-                                break
-                            if (sc == start - 1 or sc == end) and (num not in record):
-                                sum_val += int(num)
-                                record.append(num)
-                                break
+            matching_digits = [
+                coords
+                for coords in matching_digits + digits_coords
+                if coords not in record
+            ]
 
-                    if line_num > 0 and prev_digit_coords:
-                        for num, start, end in prev_digit_coords:
-                            if sc < start - 1:
-                                break
-                            if sc >= start - 1 and sc <= end + 1 and num not in record:
-                                sum_val += int(num)
-                                record.append(num)
-                                break
+            matching_symbols = [
+                coords
+                for coords in matching_symbols + symbol_coords
+                if coords not in record
+            ]
 
-            if digits_coords and line_num > 0 and prev_symbol_coords:
-                for sc in prev_symbol_coords:
-                    for num, start, end in digits_coords:
-                        if sc < start - 1:
-                            break
-                        if sc >= start - 1 and sc <= end + 1 and num not in record:
+            if matching_symbols and matching_digits:
+                for num, start, end in matching_digits:
+                    for sym_coords in matching_symbols:
+                        if sym_coords < start - 1:
+                            continue
+                        if sym_coords >= start - 1 and sym_coords <= end + 1:
                             sum_val += int(num)
-                            record.append(num)
+                            record.append((num, start, end))
                             break
 
-            # update prev coords of digits
-            prev_digit_coords = digits_coords
-            prev_symbol_coords = symbol_coords
+            # Update previous coordinates of digits and symbols
+            matching_digits = digits_coords
+            matching_symbols = symbol_coords
 
     return sum_val
 
 
 if __name__ == "__main__":
-    part_one("3/test.txt")
+    result = part_one("3/test.txt")
+    print(result)
